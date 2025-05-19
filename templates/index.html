@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <title>Optimizador Lineal 2D/3D</title>
+    <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet" />
+    <script>
+       function cambiarModo() {
+    let modo = document.getElementById('modoSelect').value;
+    const form2d = document.getElementById('form-2d');
+    const form3d = document.getElementById('form-3d');
+
+    if (modo === '2D') {
+        form2d.style.display = 'block';
+        form3d.style.display = 'none';
+
+        // Activar required en inputs 2d
+        form2d.querySelectorAll('input').forEach(input => input.required = true);
+        // Desactivar required en inputs 3d
+        form3d.querySelectorAll('input').forEach(input => input.required = false);
+    } else {
+        form2d.style.display = 'none';
+        form3d.style.display = 'block';
+
+        // Desactivar required en inputs 2d
+        form2d.querySelectorAll('input').forEach(input => input.required = false);
+        // Activar required en inputs 3d
+        form3d.querySelectorAll('input').forEach(input => input.required = true);
+    }
+}
+
+        window.onload = function() {
+            cambiarModo();
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Optimizador Lineal 2D / 3D</h1>
+
+        <form method="POST">
+            <label for="modoSelect">Selecciona modo:</label>
+            <select id="modoSelect" name="modo" onchange="cambiarModo()">
+                <option value="2D" {% if modo == '2D' %}selected{% endif %}>2D</option>
+                <option value="3D" {% if modo == '3D' %}selected{% endif %}>3D</option>
+            </select>
+
+            <!-- Formulario 2D -->
+            <div id="form-2d" style="margin-top:20px;">
+                <label>Función Objetivo (Ej: 6x + 4y):</label>
+                <input type="text" name="funcion_objetivo_2d" required placeholder="Ej: 6x + 4y" value="{{ request.form.funcion_objetivo_2d or '' }}" />
+
+                <label>Restricción 1 (Ej: x + y <= 10):</label>
+                <input type="text" name="restriccion1_2d" required placeholder="Ej: x + y <= 10" value="{{ request.form.restriccion1_2d or '' }}" />
+
+                <label>Restricción 2 (Ej: 2x + y <= 15):</label>
+                <input type="text" name="restriccion2_2d" required placeholder="Ej: 2x + y <= 15" value="{{ request.form.restriccion2_2d or '' }}" />
+            </div>
+
+            <!-- Formulario 3D -->
+            <div id="form-3d" style="margin-top:20px; display:none;">
+                <label>Función Objetivo (Ej: 7x + 5y + 9z):</label>
+                <input type="text" name="funcion_objetivo_3d" placeholder="Ej: 7x + 5y + 9z" value="{{ request.form.funcion_objetivo_3d or '' }}" />
+
+                <label>Restricción 1 (Ej: x + 2y + z <= 100):</label>
+                <input type="text" name="restriccion1_3d" placeholder="Ej: x + 2y + z <= 100" value="{{ request.form.restriccion1_3d or '' }}" />
+
+                <label>Restricción 2 (Ej: 2x + y + 3z <= 120):</label>
+                <input type="text" name="restriccion2_3d" placeholder="Ej: 2x + y + 3z <= 120" value="{{ request.form.restriccion2_3d or '' }}" />
+
+                <label>Restricción 3 (Ej: x + y + 2z <= 90):</label>
+                <input type="text" name="restriccion3_3d" placeholder="Ej: x + y + 2z <= 90" value="{{ request.form.restriccion3_3d or '' }}" />
+            </div>
+
+            <button type="submit" style="margin-top:20px;">Resolver</button>
+        </form>
+
+        {% if error %}
+            <div class="error">{{ error }}</div>
+        {% endif %}
+
+        {% if resultado %}
+            <div class="resultado" style="margin-top:20px;">
+                <h2>Resultado:</h2>
+                <ul>
+                    {% for key, value in resultado.items() %}
+                    <li>{{ key }} = {{ value | round(2) }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
+        {% if grafica_2d %}
+            <div class="grafica" style="margin-top:20px;">
+                <h2>Gráfica 2D:</h2>
+                <img src="data:image/png;base64,{{ grafica_2d }}" alt="Gráfica Región Factible 2D" />
+            </div>
+        {% endif %}
+
+        {% if grafica_3d %}
+            <div class="grafica" style="margin-top:20px;">
+                <h2>Gráfica 3D:</h2>
+                <!-- Aquí insertamos la gráfica de Plotly 3D -->
+                {{ grafica_3d | safe }}
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>
+
